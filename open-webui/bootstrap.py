@@ -166,7 +166,9 @@ def install_model_binding(
             "top_p": 0.95,
             "repeat_penalty": 1,
             "min_p": 0,
-            "max_tokens": 16384,
+            # Keep enough space for prompts and tool schemas in the portable
+            # 32K context profile. Users with larger contexts may raise it.
+            "max_tokens": 8192,
             "function_calling": "native",
         }
         meta = {

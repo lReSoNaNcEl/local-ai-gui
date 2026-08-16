@@ -8,14 +8,15 @@
 
 По умолчанию подключена
 [Qwen3.8-27B-GGUF от Unsloth](https://huggingface.co/unsloth/Qwen3.8-27B-GGUF)
-в квантовании Q5_K_M и с совместимым F16 vision-projector. Это только
+в квантовании Q4_K_M и с совместимым F16 vision-projector. Это только
 проверенный default: модель не зашита в архитектуру проекта и заменяется
 через переменные `MODEL_*` в `.env`. Для Vision-модели основной GGUF и
 `mmproj` должны относиться к одной модели и ревизии.
 
 Дефолтная Qwen3.8 имеет лицензию Apache-2.0, thinking, MTP и нативный
-контекст до 262 144 токенов. Публичный профиль начинает с более переносимого окна
-65 536 токенов; профиль для GPU с 32 GB VRAM приведён ниже.
+контекст до 262 144 токенов. Публичный профиль начинает с окна
+32 768 токенов и рассчитан на GPU с 16 GB VRAM; профиль для 32 GB VRAM
+приведён ниже.
 
 > [!IMPORTANT]
 > Этот репозиторий рассчитан на Windows 10/11 и Docker Desktop с
@@ -55,12 +56,14 @@ LLM API и Open Terminal доступны только во внутренней
 - Node.js 22 LTS и npm (minimum — Node.js 20.19; Node.js 18 не поддерживается
   закреплённым `chrome-devtools-mcp`);
 - Google Chrome Stable;
-- не менее 35 GB свободного места: около 20.8 GB занимают GGUF и
+- не менее 35 GB свободного места: около 18 GB занимают GGUF и
   projector, остальное нужно Docker-образам и данным WebUI;
-- рекомендуется NVIDIA GPU с 24 GB VRAM и 32 GB системной RAM или больше.
+- рекомендуется NVIDIA GPU с 16 GB VRAM и не менее 32 GB системной RAM;
+  48 GB RAM дают больший запас при частичном GPU-offload.
 
-На GPU с меньшим объёмом памяти `MODEL_GPU_LAYERS=auto` может выгрузить часть
-слоёв в RAM, но 27B-модель будет работать заметно медленнее. Для полного профиля
+Дефолтный Q4_K_M вместе с projector и рабочими буферами не помещается
+в 16 GB VRAM целиком. `MODEL_GPU_LAYERS=auto` автоматически оставляет часть слоёв
+в системной RAM, поэтому скорость будет ниже, чем при полном offload. Для профиля
 192K рекомендуется 32 GB VRAM и 64 GB RAM или больше.
 
 ## Быстрый запуск
@@ -85,7 +88,7 @@ LLM API и Open Terminal доступны только во внутренней
 9. ждёт health-check всех контейнеров;
 10. устанавливает в Open WebUI модель и фильтр Reasoning Effort.
 
-Первый запуск может занять много времени: скачивается около 20.8 GB
+Первый запуск может занять много времени: скачивается около 18 GB
 модельных файлов и несколько Docker-образов. Прерванная загрузка GGUF
 продолжится при следующем `start.cmd`.
 
@@ -95,8 +98,8 @@ LLM API и Open Terminal доступны только во внутренней
 администратором.
 
 В выборе модели используйте имя из `MODEL_DISPLAY_NAME`: в дефолтном
-профиле это **Qwen3.8 27B Q5_K_M Vision**. Проект заранее привязывает к этой модели **Chrome**,
-**Computer**, **Projects Terminal** и **Reasoning Effort**, поэтом в новых чатах
+профиле это **Qwen3.8 27B Q4_K_M Vision**. Проект заранее привязывает к этой модели **Chrome**,
+**Computer**, **Projects Terminal** и **Reasoning Effort**, поэтому в новых чатах
 они активны автоматически. У необработанной base-модели с тем же API ID
 этих привязок может не быть.
 
@@ -120,6 +123,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Stop-McpHost.p
 Не редактируйте `.env.example` для личной машины. Меняйте созданный `.env`: он
 исключён из Git и может содержать локальные пути, ключи и выбранную модель.
 Записывайте значения как `NAME=value`, без кавычек вокруг значения.
+Обновление `.env.example` не перезаписывает уже существующий `.env`: новые
+defaults применяются к свежим клонам, а текущие установки сохраняют выбранный
+пользователем профиль.
 
 ### Docker и порты
 
@@ -147,21 +153,21 @@ Open WebUI connection URL.
 
 | Переменная | Default | Описание |
 |---|---|---|
-| `MODEL_API_ID` | `local/qwen3.8-27b:q5_k_m` | ID модели в API и Open WebUI |
-| `MODEL_DISPLAY_NAME` | `Qwen3.8 27B Q5_K_M Vision` | Видимое название |
-| `MODEL_GGUF_FILE` | `Qwen3.8-27B-Q5_K_M.gguf` | Локальное имя основного GGUF |
+| `MODEL_API_ID` | `local/qwen3.8-27b:q4_k_m` | ID модели в API и Open WebUI |
+| `MODEL_DISPLAY_NAME` | `Qwen3.8 27B Q4_K_M Vision` | Видимое название |
+| `MODEL_GGUF_FILE` | `Qwen3.8-27B-Q4_K_M.gguf` | Локальное имя основного GGUF |
 | `MODEL_GGUF_URL` | Unsloth Hugging Face | Точный URL основного GGUF |
 | `MODEL_GGUF_SHA256` | проверенная сумма | Контроль целостности основного GGUF |
 | `MODEL_MMPROJ_FILE` | `mmproj-F16.gguf` | Локальное имя vision-projector |
 | `MODEL_MMPROJ_URL` | Unsloth Hugging Face | Точный URL projector |
 | `MODEL_MMPROJ_SHA256` | проверенная сумма | Контроль целостности projector |
-| `MODEL_CONTEXT_SIZE` | `65536` | Общее контекстное окно одного inference-слота |
+| `MODEL_CONTEXT_SIZE` | `32768` | Общее контекстное окно одного inference-слота |
 | `MODEL_PARALLEL` | `1` | Число параллельных слотов |
 | `MODEL_GPU_LAYERS` | `auto` | `auto`, `all` или точное число слоёв на GPU |
 | `MODEL_KV_CACHE_TYPE` | `q4_0` | Тип K/V-кэша; Q4 экономит VRAM, Q8 точнее |
 | `MODEL_IMAGE_MIN_TOKENS` | `1024` | Минимальный бюджет токенов изображения для Qwen-VL |
-| `MODEL_SPECULATIVE_TYPE` | `draft-mtp` | Встроенное MTP speculative decoding |
-| `MODEL_SPECULATIVE_TOKENS` | `2` | Максимальное число MTP draft-токенов |
+| `MODEL_SPECULATIVE_TYPE` | `none` | MTP отключён в профиле 16 GB для экономии памяти |
+| `MODEL_SPECULATIVE_TOKENS` | `0` | Максимальное число MTP draft-токенов |
 
 Файлы загружаются в `.model-cache`, проверяются по SHA-256 и монтируются в
 контейнер только для чтения. Частичная загрузка сохраняется с расширением
@@ -169,11 +175,12 @@ Open WebUI connection URL.
 
 Для другой Vision GGUF-модели необходимо заменить одновременно основной GGUF и
 совместимый с ним `mmproj`. Projector от другой модели или ревизии использовать
-нельзя. Если новая модель не содержит MTP, установите:
+нельзя. Если выбранная модель поддерживает MTP и есть запас VRAM, его можно
+включить:
 
 ```dotenv
-MODEL_SPECULATIVE_TYPE=none
-MODEL_SPECULATIVE_TOKENS=0
+MODEL_SPECULATIVE_TYPE=draft-mtp
+MODEL_SPECULATIVE_TOKENS=2
 ```
 
 ### Open WebUI и сжатие контекста
@@ -184,8 +191,8 @@ MODEL_SPECULATIVE_TOKENS=0
 | `WEBUI_SECRET_KEY` | генерируется | Секрет сессий Open WebUI |
 | `OPEN_TERMINAL_API_KEY` | генерируется | Bearer key между WebUI и Terminal |
 | `CONTEXT_COMPACTION_ENABLED` | `true` | Автоматическое сжатие длинного чата |
-| `CONTEXT_COMPACTION_TOKEN_THRESHOLD` | `40000` | Когда начинать сжатие |
-| `CONTEXT_COMPACTION_TOKEN_CAP` | `40000` | Максимальный объём до summary |
+| `CONTEXT_COMPACTION_TOKEN_THRESHOLD` | `16000` | Когда начинать сжатие |
+| `CONTEXT_COMPACTION_TOKEN_CAP` | `16000` | Максимальный объём до summary |
 | `CONTEXT_COMPACTION_RETENTION_PERCENTAGE` | `25` | Доля последних сообщений, сохраняемая дословно; допустимо 10–50 |
 
 Не публикуйте `.env`. Если секреты когда-либо попали в Git или публичный лог,
@@ -223,22 +230,31 @@ PROJECTS_DIR=D:/Work/Projects
 
 ## Профили GPU и контекста
 
-### Переносимый default для 24 GB VRAM
+### Переносимый default для 16 GB VRAM
 
 ```dotenv
-MODEL_CONTEXT_SIZE=65536
+MODEL_CONTEXT_SIZE=32768
 MODEL_GPU_LAYERS=auto
 MODEL_KV_CACHE_TYPE=q4_0
-CONTEXT_COMPACTION_TOKEN_THRESHOLD=40000
-CONTEXT_COMPACTION_TOKEN_CAP=40000
+MODEL_SPECULATIVE_TYPE=none
+MODEL_SPECULATIVE_TOKENS=0
+CONTEXT_COMPACTION_TOKEN_THRESHOLD=16000
+CONTEXT_COMPACTION_TOKEN_CAP=16000
 ```
 
 ### Высококачественный профиль для 32 GB VRAM
 
 ```dotenv
+MODEL_API_ID=local/qwen3.8-27b:q5_k_m
+MODEL_DISPLAY_NAME=Qwen3.8 27B Q5_K_M Vision
+MODEL_GGUF_FILE=Qwen3.8-27B-Q5_K_M.gguf
+MODEL_GGUF_URL=https://huggingface.co/unsloth/Qwen3.8-27B-GGUF/resolve/main/Qwen3.8-27B-Q5_K_M.gguf?download=true
+MODEL_GGUF_SHA256=07deb7fa91bf751d3000774fe5bb8afae5ffb41255fd19980147468052e07177
 MODEL_CONTEXT_SIZE=196608
 MODEL_GPU_LAYERS=all
 MODEL_KV_CACHE_TYPE=q8_0
+MODEL_SPECULATIVE_TYPE=draft-mtp
+MODEL_SPECULATIVE_TOKENS=2
 CONTEXT_COMPACTION_TOKEN_THRESHOLD=75000
 CONTEXT_COMPACTION_TOKEN_CAP=75000
 ```

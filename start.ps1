@@ -129,12 +129,12 @@ Ensure-LocalSecret -Name 'OPEN_TERMINAL_API_KEY'
 
 $webuiPort = Get-IntegerEnvironmentValue -Name 'WEBUI_PORT' -Default 3000 -Maximum 65535
 [void](Get-IntegerEnvironmentValue -Name 'LLM_SERVER_PORT' -Default 8080 -Maximum 65535)
-$contextSize = Get-IntegerEnvironmentValue -Name 'MODEL_CONTEXT_SIZE' -Default 65536 -Minimum 1024
+$contextSize = Get-IntegerEnvironmentValue -Name 'MODEL_CONTEXT_SIZE' -Default 32768 -Minimum 1024
 [void](Get-IntegerEnvironmentValue -Name 'MODEL_PARALLEL' -Default 1)
 [void](Get-IntegerEnvironmentValue -Name 'MODEL_IMAGE_MIN_TOKENS' -Default 1024)
-[void](Get-IntegerEnvironmentValue -Name 'MODEL_SPECULATIVE_TOKENS' -Default 2 -Minimum 0)
-$compactionThreshold = Get-IntegerEnvironmentValue -Name 'CONTEXT_COMPACTION_TOKEN_THRESHOLD' -Default 40000
-$compactionCap = Get-IntegerEnvironmentValue -Name 'CONTEXT_COMPACTION_TOKEN_CAP' -Default 40000
+[void](Get-IntegerEnvironmentValue -Name 'MODEL_SPECULATIVE_TOKENS' -Default 0 -Minimum 0)
+$compactionThreshold = Get-IntegerEnvironmentValue -Name 'CONTEXT_COMPACTION_TOKEN_THRESHOLD' -Default 16000
+$compactionCap = Get-IntegerEnvironmentValue -Name 'CONTEXT_COMPACTION_TOKEN_CAP' -Default 16000
 [void](Get-IntegerEnvironmentValue -Name 'CONTEXT_COMPACTION_RETENTION_PERCENTAGE' -Default 25 -Minimum 10 -Maximum 50)
 
 foreach ($booleanVariable in @(

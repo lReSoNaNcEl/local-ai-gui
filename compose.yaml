@@ -17,7 +17,7 @@ services:
       - "--port"
       - "${LLM_SERVER_PORT:-8080}"
       - "--ctx-size"
-      - "${MODEL_CONTEXT_SIZE:-65536}"
+      - "${MODEL_CONTEXT_SIZE:-32768}"
       - "--parallel"
       - "${MODEL_PARALLEL:-1}"
       - "--gpu-layers"
@@ -36,9 +36,9 @@ services:
       - "--reasoning-format"
       - "deepseek"
       - "--spec-type"
-      - "${MODEL_SPECULATIVE_TYPE:-draft-mtp}"
+      - "${MODEL_SPECULATIVE_TYPE:-none}"
       - "--spec-draft-n-max"
-      - "${MODEL_SPECULATIVE_TOKENS:-2}"
+      - "${MODEL_SPECULATIVE_TOKENS:-0}"
     volumes:
       - ./.model-cache:/models:ro
     healthcheck:
@@ -69,8 +69,8 @@ services:
       ENABLE_CONTEXT_COMPACTION: "${CONTEXT_COMPACTION_ENABLED:-true}"
       # Leave room for large MCP tool schemas, Russian text (which Open WebUI's
       # character-based estimate undercounts), and the model's response.
-      CONTEXT_COMPACTION_TOKEN_THRESHOLD: "${CONTEXT_COMPACTION_TOKEN_THRESHOLD:-40000}"
-      CONTEXT_COMPACTION_TOKEN_CAP: "${CONTEXT_COMPACTION_TOKEN_CAP:-40000}"
+      CONTEXT_COMPACTION_TOKEN_THRESHOLD: "${CONTEXT_COMPACTION_TOKEN_THRESHOLD:-16000}"
+      CONTEXT_COMPACTION_TOKEN_CAP: "${CONTEXT_COMPACTION_TOKEN_CAP:-16000}"
       CONTEXT_COMPACTION_RETENTION_PERCENTAGE: "${CONTEXT_COMPACTION_RETENTION_PERCENTAGE:-25}"
       TOOL_SERVER_CONNECTIONS: >-
         [{"type":"mcp","url":"http://host.docker.internal:${CHROME_DEVTOOLS_MCP_PORT:-8933}/mcp","path":"/mcp","auth_type":"none","key":"","config":{"enable":true,"access_grants":[]},"info":{"id":"chrome-devtools","name":"Chrome","description":"Control and inspect every open tab and window in the dedicated Agent Chrome profile."}},{"type":"mcp","url":"http://host.docker.internal:${COMPUTER_USE_MCP_PORT:-8932}/mcp","path":"/mcp","auth_type":"none","key":"","config":{"enable":true,"access_grants":[]},"info":{"id":"computer-use","name":"Computer","description":"Windows desktop automation via UI Automation, screenshots, mouse and keyboard, with access to configured filesystem roots."}}]
