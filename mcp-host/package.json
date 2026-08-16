@@ -1,0 +1,11 @@
+{
+  "name": "local-ai-host-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pinned host-side MCP dependencies for a local AI + Open WebUI stack",
+  "dependencies": {
+    "@zavora-ai/computer-use-mcp": "7.0.0",
+    "chrome-devtools-mcp": "1.7.0",
+    "supergateway": "3.4.3"
+  }
+}

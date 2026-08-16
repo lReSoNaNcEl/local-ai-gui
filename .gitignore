@@ -1,0 +1,30 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Installed dependencies
+mcp-host/node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Runtime state and generated logs
+.runtime/
+.model-cache/
+logs/
+*.log
+*.tmp
+*.pid
+
+# Portable default workspace (user projects, not stack configuration)
+projects/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
