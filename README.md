@@ -136,7 +136,7 @@ defaults применяются к свежим клонам, а текущие 
 | `WEBUI_PORT` | `3000` | Порт Open WebUI на `127.0.0.1` Windows |
 | `LLM_SERVER_PORT` | `8080` | Внутренний порт `llm-server`; на host не публикуется |
 | `LLAMA_CPP_IMAGE` | закреплённый digest | Проверенная CUDA-сборка `llama.cpp` |
-| `OPEN_WEBUI_IMAGE` | закреплённый digest | Проверенная версия Open WebUI 0.11.0 |
+| `OPEN_WEBUI_IMAGE` | закреплённый digest | Проверенная версия Open WebUI 0.11.4 |
 | `OPEN_TERMINAL_IMAGE` | закреплённый digest | Проверенная версия Open Terminal 0.11.35 |
 
 Внутренние порты Open WebUI `8080` и Open Terminal `8000` являются контрактом
